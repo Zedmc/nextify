@@ -7,24 +7,33 @@ interface MongooseConnection {
 	promise: Promise<Mongoose> | null;
 }
 
-let cached: MongooseConnection = (global as any).mongoose;
+// Extend global object to include mongoose connection type
+declare global {
+	// Allow global to have a mongoose property (Next.js specific)
+	var mongoose: MongooseConnection | undefined;
+}
+
+let cached: MongooseConnection = global.mongoose || {
+	conn: null,
+	promise: null,
+};
 
 if (!cached) {
-	cached = (global as any).mongoose = {
+	cached = global.mongoose = {
 		conn: null,
 		promise: null,
 	};
 }
 
 export const connectToDatabase = async () => {
-	if (cached.conn) return cached.conn; //optimization to check if we already have a cached connection, then we exit immediately, otherwise we continue...
+	if (cached.conn) return cached.conn;
 
 	if (!MONGODB_URL) throw new Error("Missing MONGODB_URL");
 
 	cached.promise =
 		cached.promise ||
 		mongoose.connect(MONGODB_URL, {
-			dbName: "Imaginify",
+			dbName: "netxify", // Updated database name
 			bufferCommands: false,
 		});
 
