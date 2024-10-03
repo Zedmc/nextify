@@ -57,7 +57,11 @@ export const formUrlQuery = ({
 	searchParams,
 	key,
 	value,
-}: FormUrlQueryParams) => {
+}: {
+	searchParams: URLSearchParams;
+	key: string;
+	value: string | number;
+}) => {
 	const params = { ...qs.parse(searchParams.toString()), [key]: value };
 
 	return `${window.location.pathname}?${qs.stringify(params, {
@@ -69,8 +73,11 @@ export const formUrlQuery = ({
 export function removeKeysFromQuery({
 	searchParams,
 	keysToRemove,
-}: RemoveUrlQueryParams) {
-	const currentUrl = qs.parse(searchParams);
+}: {
+	searchParams: URLSearchParams;
+	keysToRemove: string[];
+}) {
+	const currentUrl = qs.parse(searchParams.toString());
 
 	keysToRemove.forEach((key) => {
 		delete currentUrl[key];
@@ -85,11 +92,14 @@ export function removeKeysFromQuery({
 }
 
 // DEBOUNCE
-export const debounce = (func: (...args: any[]) => void, delay: number) => {
-	let timeoutId: NodeJS.Timeout | null;
-	return (...args: any[]) => {
+export const debounce = <T extends unknown[]>(
+	func: (...args: T) => void,
+	delay: number
+) => {
+	let timeoutId: NodeJS.Timeout | null = null;
+	return (...args: T) => {
 		if (timeoutId) clearTimeout(timeoutId);
-		timeoutId = setTimeout(() => func.apply(null, args), delay);
+		timeoutId = setTimeout(() => func(...args), delay); // Use spread operator instead of .apply
 	};
 };
 
@@ -97,7 +107,7 @@ export const debounce = (func: (...args: any[]) => void, delay: number) => {
 export type AspectRatioKey = keyof typeof aspectRatioOptions;
 export const getImageSize = (
 	type: string,
-	image: any,
+	image: { aspectRatio?: AspectRatioKey; width?: number; height?: number },
 	dimension: "width" | "height"
 ): number => {
 	if (type === "fill") {
@@ -131,12 +141,15 @@ export const download = (url: string, filename: string) => {
 };
 
 // DEEP MERGE OBJECTS
-export const deepMergeObjects = (obj1: any, obj2: any) => {
+export const deepMergeObjects = (
+	obj1: Record<string, unknown>,
+	obj2: Record<string, unknown>
+): Record<string, unknown> => {
 	if (obj2 === null || obj2 === undefined) {
 		return obj1;
 	}
 
-	let output = { ...obj2 };
+	let output: Record<string, unknown> = { ...obj2 };
 
 	for (let key in obj1) {
 		if (obj1.hasOwnProperty(key)) {
@@ -146,7 +159,10 @@ export const deepMergeObjects = (obj1: any, obj2: any) => {
 				obj2[key] &&
 				typeof obj2[key] === "object"
 			) {
-				output[key] = deepMergeObjects(obj1[key], obj2[key]);
+				output[key] = deepMergeObjects(
+					obj1[key] as Record<string, unknown>,
+					obj2[key] as Record<string, unknown>
+				);
 			} else {
 				output[key] = obj1[key];
 			}

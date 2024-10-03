@@ -10,33 +10,34 @@ interface MongooseConnection {
 // Extend global object to include mongoose connection type
 declare global {
 	// Allow global to have a mongoose property (Next.js specific)
+	// We explicitly state the type as MongooseConnection or undefined.
 	var mongoose: MongooseConnection | undefined;
 }
 
-let cached: MongooseConnection = global.mongoose || {
+// Type assertion to ensure global.mongoose exists with the correct type
+let cached: MongooseConnection = global.mongoose ?? {
 	conn: null,
 	promise: null,
 };
 
-if (!cached) {
-	cached = global.mongoose = {
-		conn: null,
-		promise: null,
-	};
-}
-
 export const connectToDatabase = async () => {
-	if (cached.conn) return cached.conn;
+	if (cached.conn) {
+		return cached.conn;
+	}
 
-	if (!MONGODB_URL) throw new Error("Missing MONGODB_URL");
+	if (!MONGODB_URL) {
+		throw new Error("Missing MONGODB_URL");
+	}
 
 	cached.promise =
-		cached.promise ||
+		cached.promise ??
 		mongoose.connect(MONGODB_URL, {
-			dbName: "netxify", // Updated database name
+			dbName: "nextify", // Updated database name
 			bufferCommands: false,
 		});
 
 	cached.conn = await cached.promise;
+	global.mongoose = cached; // Ensure to set the global value for future use
+
 	return cached.conn;
 };
