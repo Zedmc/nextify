@@ -4,10 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import {
 	ClerkProvider,
-	SignInButton,
-	SignedIn,
-	SignedOut,
-	UserButton,
+	
 } from "@clerk/nextjs";
 
 // Import Poppins font with the desired weights, styles, and subsets
@@ -41,11 +38,6 @@ export default function RootLayout({
 					<link rel="icon" href="/favicon.ico" />
 				</head>
 				<body className={cn("font-poppins antialiased", poppins.variable)}>
-					{/* <SignedOut>
-						<SignInButton />
-					</SignedOut>
-					<SignedIn>
-					</SignedIn> */}
 					{children}
 				</body>
 			</html>
