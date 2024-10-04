@@ -80,12 +80,14 @@ export function removeKeysFromQuery({
 	const currentUrl = qs.parse(searchParams.toString());
 
 	keysToRemove.forEach((key) => {
-		delete currentUrl[key];
+		delete currentUrl[key as keyof typeof currentUrl];
 	});
 
 	// Remove null or undefined values
 	Object.keys(currentUrl).forEach(
-		(key) => currentUrl[key] == null && delete currentUrl[key]
+		(key) =>
+			currentUrl[key as keyof typeof currentUrl] == null &&
+			delete currentUrl[key as keyof typeof currentUrl]
 	);
 
 	return `${window.location.pathname}?${qs.stringify(currentUrl)}`;
@@ -99,11 +101,11 @@ export const debounce = <T extends unknown[]>(
 	let timeoutId: NodeJS.Timeout | null = null;
 	return (...args: T) => {
 		if (timeoutId) clearTimeout(timeoutId);
-		timeoutId = setTimeout(() => func(...args), delay); // Use spread operator instead of .apply
+		timeoutId = setTimeout(() => func(...args), delay); // Use spread operator instead of .apply()
 	};
 };
 
-// GE IMAGE SIZE
+// GET IMAGE SIZE
 export type AspectRatioKey = keyof typeof aspectRatioOptions;
 export const getImageSize = (
 	type: string,
